@@ -6,7 +6,11 @@
   "private": "true",
   "dependencies": {
     "async": "0.2.x",
+    "babel-eslint": "^4.1.2",
     "cron": "1.0.x",
+    "eslint": "^1.4.1",
+    "eslint-config-airbnb": "0.0.8",
+    "eslint-plugin-react": "^3.3.2",
     "express": "3.2.x",
     "irc": "0.3.x",
     "jade": "0.31.x",
@@ -18,7 +22,8 @@
   },
   "scripts": {
     "start": "while(true) do node standupbot.js; sleep 5; done",
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "eslint ."
   },
   "engine": "node >= 0.8.14"
 }
