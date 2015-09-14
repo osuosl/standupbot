@@ -254,5 +254,5 @@ process.on('SIGINT', function() {
 });
 
 // Start the server
-app.listen(8080);
-console.log('Listening on port 8080');
+app.listen(config.web.port);
+console.log('Listening on port ' + config.web.port);
