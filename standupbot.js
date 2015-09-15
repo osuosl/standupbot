@@ -10,6 +10,8 @@
 */
 
 // Imports
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var express = require('express');
 var fs = require('fs');
 var yaml = require('js-yaml');
@@ -69,9 +71,9 @@ app.set('view engine', 'jade');
 app.use('/static', express.static(__dirname + '/public'));
 
 // Enable web framework to parse HTTP params
-app.use(express.bodyParser());
+app.use(bodyParser.json({ extended: true }));
 // Enable cookie parsing on requests
-app.use(express.cookieParser());
+app.use(cookieParser());
 
 // Serve up the root which includes the form
 app.get('/', function(req, res) {
