@@ -1,3 +1,5 @@
+[![Dependency Status](https://david-dm.org/osuosl/standupbot.svg)](https://david-dm.org/osuosl/standupbot)
+
 Run it via
 `$ npm start`
 
