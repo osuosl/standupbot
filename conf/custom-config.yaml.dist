@@ -19,6 +19,8 @@ config:
     - member1
     - member2
   domain: 'example.com'
+  web:
+    port: 8080
   timers: {
     earlyReminder: '0 45 17 * * 1-5',
     dueReminder: '0 0 19 * * 1-5',

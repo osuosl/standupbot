@@ -1,5 +1,5 @@
 Run it via
-`$ ./run.sh`
+`$ npm start`
 
 
 # Installation Notes
@@ -35,4 +35,3 @@ GOTO Common
 
 ## Common
 `$ npm install js-yaml fs express irc async cron jade sqlite3`
-

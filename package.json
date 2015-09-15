@@ -2,22 +2,28 @@
   "name": "standupbot",
   "description": "A bot and small website used for standups",
   "author": "Ele Dev <ele-dev@lists.rackspace.com>",
-  "version" : "0.0.1",
-  "private" : "true",
+  "version": "0.0.1",
+  "private": "true",
   "dependencies": {
-    "js-yaml": "2.0.x",
+    "async": "0.2.x",
+    "babel-eslint": "^4.1.2",
+    "cron": "1.0.x",
+    "eslint": "^1.4.1",
+    "eslint-config-airbnb": "0.0.8",
+    "eslint-plugin-react": "^3.3.2",
     "express": "3.2.x",
     "irc": "0.3.x",
-    "async": "0.2.x",
-    "cron": "1.0.x",
     "jade": "0.31.x",
-    "sqlite3": "2.1.x"
+    "js-yaml": "2.0.x",
+    "sqlite3": "^3.1.0"
   },
   "devDependencies": {
     "mocha": "1.10.x"
   },
   "scripts": {
-    "test": "mocha"
+    "start": "while(true) do node standupbot.js; sleep 5; done",
+    "test": "mocha",
+    "lint": "eslint ."
   },
   "engine": "node >= 0.8.14"
 }
