@@ -1,37 +1,28 @@
+[![Dependency Status](https://david-dm.org/osuosl/standupbot.svg)](https://david-dm.org/osuosl/standupbot)
+
 Run it via
 `$ npm start`
 
 
 # Installation Notes
+First install nodejs the normal way for your operating system.
 
+## OS X with Homebrew
 
-## MacOSX
+```
+$ brew install node
+```
 
-`$ brew install node`
+## Ubuntu Linux
 
-`$ brew install npm`
+```
+$ sudo apt-get update
+$sudo apt-get install nodejs
+```
 
-GOTO Common
+##Install the bot and dependencies
 
-## Linux Ubuntu 12.04
-
-`$ sudo apt-get update`
-
-`$sudo apt-get install g++ curl libssl-dev apache2-utils git-core make`
-
-`$ wget http://nodejs.org/dist/v0.8.14/node-v0.8.14.tar.gz`
-
-`$ tar xzvf node-v0.8.14.tar.gz`
-
-`$ cd node-v0.8.14`
-
-`$ ./configure`
-
-`$ make`
-
-`$ sudo make install`
-
-GOTO Common
-
-## Common
-`$ npm install js-yaml fs express irc async cron jade sqlite3`
+```
+$ cd path/to/standupbot
+$ npm install
+```
