@@ -1,14 +1,3 @@
-/* Pre-req's
-  npm install irc
-  npm install js-yaml
-  npm install express
-  npm install fs
-  npm install async
-  npm install cron
-  npm install jade
-  npm install sqlite3
-*/
-
 // Imports
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -17,37 +6,11 @@ var fs = require('fs');
 var yaml = require('js-yaml');
 var async = require('async');
 var jade = require('jade');
-var sqlite = require('sqlite3');
 var ircHandler = require('./ircHandler');
 var STATES = ['completed', 'inprogress', 'impediments'];
 
-// Open db and make sure stats table exists
-var db = new sqlite.Database('stats.db');
-db.serialize(function() {
-  function createStats(callback) {
-    db.run("CREATE TABLE stats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, time DATETIME NOT NULL, finished BOOLEAN NOT NULL, inprogress BOOLEAN NOT NULL, impediments BOOLEAN NOT NULL)", function(err) {
-      if (err) {
-        console.log('stats table already exists.');
-      }
-      if (callback) {
-        callback();
-      }
-    });
-  }
-
-  function createStatuses(callback) {
-    db.run("CREATE TABLE statuses (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, time DATETIME NOT NULL, state INTEGER NOT NULL, status TEXT NOT NULL, stats INTEGER NOT NULL)", function(err) {
-      if (err) {
-        console.log('statuses table already exists');
-      }
-      if (callback) {
-        callback();
-      }
-    });
-  }
-
-  createStats(createStatuses);
-});
+var knexFile = require('./knexfile');
+var knex = require('knex')(knexFile['development']);
 
 // Load Configuration
 var configFile = "./conf/custom-config.yaml";
@@ -71,7 +34,7 @@ app.set('view engine', 'jade');
 app.use('/static', express.static(__dirname + '/public'));
 
 // Enable web framework to parse HTTP params
-app.use(bodyParser.json({ extended: true }));
+app.use(bodyParser.urlencoded({extended: false}));
 // Enable cookie parsing on requests
 app.use(cookieParser());
 
@@ -89,38 +52,40 @@ app.get('/', function(req, res) {
   }
 
   if (req.cookies.lastID) {
-    getStatusForID(req.cookies.lastID, function(err, result) {
+    knex('statuses').where({stats: req.cookies.lastID}).then(function(result) {
       for (var i=0; i<result.length; i++) {
         var row = result[i],
             key = STATES[row.state];
         locals[key].push(row.status);
       }
       render(locals);
+    }).catch(function(err) {
+      // TODO handle this error
     });
   } else {
     render(locals);
   }
 });
 
-app.get('/api/historical', function(req, res) {
-  getHistoricalData(function(err, results) {
-    var locals = {
-      statsID: results.stats,
-      statuses: results.statuses,
-      states: {},
-      members: config.members
-    };
-
-    for (var k in STATES) {
-      locals.states[k] = STATES[k];
-    }
-    var body = JSON.stringify(locals);
-    res.set('Content-type', 'application/json');
-    res.set('Content-length', body.length);
-    res.write(body);
-    res.end();
-  });
-});
+// app.get('/api/historical', function(req, res) {
+//   getHistoricalData(function(err, results) {
+//     var locals = {
+//       statsID: results.stats,
+//       statuses: results.statuses,
+//       states: {},
+//       members: config.members
+//     };
+//
+//     for (var k in STATES) {
+//       locals.states[k] = STATES[k];
+//     }
+//     var body = JSON.stringify(locals);
+//     res.set('Content-type', 'application/json');
+//     res.set('Content-length', body.length);
+//     res.write(body);
+//     res.end();
+//   });
+// });
 
 // Handle the API request
 app.post('/irc', function(req, res){
@@ -170,33 +135,6 @@ app.post('/irc', function(req, res){
   });
 });
 
-// save a row to the db for each status message in a standup
-function saveStatusRows(lastID, locals, callback) {
-  var now = new Date().getTime(),
-      statements = [];
-  for (var k in STATES) {
-    var key = STATES[k];
-    for (var i=0; i<locals[key].length; i++) {
-      if (locals[key][i].length) {
-        statements.push(['INSERT INTO statuses VALUES (NULL, ?, ?, ?, ?, ?)',
-                        [locals.irc_nick, now, k, locals[key][i], lastID]]);
-      }
-    }
-  }
-
-  async.forEach(statements,
-      function(item, callback) {
-        var stmt = db.prepare(item[0]);
-        var args = item[1];
-        stmt.run.apply(stmt, args);
-        stmt.finalize(callback);
-      },
-      function(err) {
-        callback(err);
-      }
-  );
-}
-
 // trim each line to 500 characters max
 function truncateResult(result) {
   var htmlLines = result.split('\n'),
@@ -214,44 +152,54 @@ function truncateResult(result) {
   return result
 }
 
-function saveStatsRow(name, finished, inProgress, impediments, callback) {
+
+// save a row to the db for each status message in a standup
+function saveStatusRows(lastID, locals, callback) {
   var now = new Date().getTime();
+  statuses = [];
+  for (var state of STATES) {
+    // for every state, a user can submit multiple tasks with linebreaks
+    for (var task of locals[state]) {
+      statuses.push({name: locals.irc_nick, time: now, state: state, status: task, stats: lastID});
+    }
+  }
 
-  db.run("INSERT INTO stats VALUES (NULL, ?, ?, ?, ?, ?)",
-         [name, now, finished, inProgress, impediments],
-         function(err) {
-           callback(err, this.lastID);
-        });
-}
-
-function getHistoricalData(callback) {
-  var data = {foo: 'bar', states: {}};
-
-  readAllRows('stats', function(err, rows) {
-    if (err) { console.log('Error reading database! ' + err); }
-    data.stats = rows;
-    readAllRows('statuses', function(err, rows) {
-      if (err) { console.log('Error reading database! ' + err); }
-      data.statuses = rows;
-      callback(null, data);
-    });
+  knex('statuses').insert(statuses).then(function() {
+    callback();
+  }).catch(function(err) {
+    callback(err);
   });
 }
 
-function getStatusForID(id, callback) {
-  db.all('select * from statuses where stats = ?', [id], callback);
-};
+function saveStatsRow(name, finished, inprogress, impediments, callback) {
+  var now = new Date().getTime();
 
-function readAllRows(table, callback) {
-  var rows = [];
-  db.all("SELECT * FROM " + table, callback);
+  knex('stats').insert({name: name, time: now, finished: finished, inprogress: inprogress, impediments: impediments}).then(function() {
+    knex('stats').where({name: name, time: now}).first().then(function(stat) {
+      callback(null, stat.id);
+    }).catch(function(err) {
+      callback(err);
+    });
+  }).catch(function(err) {
+    callback(err);
+  });
 }
+
+// TODO historical data
+
+function getStatusForID(id, callback) {
+  knex('statuses').where({stats: id}).then(function(results) {
+    callback(null, results);
+  }).catch(function(err) {
+    callback(err);
+  });
+};
 
 process.on('SIGINT', function() {
   console.log("\nGracefully shutting down from SIGINT (Ctrl+C)");
 
   ircHandler.disconnect();
-  db.close();
+  knex.destroy();
   process.exit();
 });
 

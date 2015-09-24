@@ -1,3 +1,5 @@
 conf/custom-config.yaml
 node_modules/
 stats.db
+dev.sqlite3
+members/
