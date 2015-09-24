@@ -67,25 +67,32 @@ app.get('/', function(req, res) {
   }
 });
 
-// app.get('/api/historical', function(req, res) {
-//   getHistoricalData(function(err, results) {
-//     var locals = {
-//       statsID: results.stats,
-//       statuses: results.statuses,
-//       states: {},
-//       members: config.members
-//     };
-//
-//     for (var k in STATES) {
-//       locals.states[k] = STATES[k];
-//     }
-//     var body = JSON.stringify(locals);
-//     res.set('Content-type', 'application/json');
-//     res.set('Content-length', body.length);
-//     res.write(body);
-//     res.end();
-//   });
-// });
+app.get('/api/historical', function(req, res) {
+  knex('stats').then(function(stats) {
+    knex('statuses').then(function(statuses) {
+      var locals = {
+        statsID: stats,
+        statuses: statuses,
+        states: {},
+        members: config.members
+      };
+
+      for (var k in STATES) {
+        locals.states[k] = STATES[k];
+      }
+
+      var body = JSON.stringify(locals);
+      res.set('Content-type', 'application/json');
+      res.set('Content-length', body.length);
+      res.write(body);
+      res.end();
+    }).catch(function(err) {
+      res.send(JSON.stringify({error: 'Database connection failure'}));
+    });
+  }).catch(function(err) {
+    res.send(JSON.stringify({error: 'Database connection failure'}));
+  });
+});
 
 // Handle the API request
 app.post('/irc', function(req, res){
@@ -184,8 +191,6 @@ function saveStatsRow(name, finished, inprogress, impediments, callback) {
     callback(err);
   });
 }
-
-// TODO historical data
 
 function getStatusForID(id, callback) {
   knex('statuses').where({stats: id}).then(function(results) {
