@@ -159,7 +159,6 @@ function truncateResult(result) {
   return result
 }
 
-
 // save a row to the db for each status message in a standup
 function saveStatusRows(lastID, locals, callback) {
   var now = new Date().getTime();
@@ -191,14 +190,6 @@ function saveStatsRow(name, finished, inprogress, impediments, callback) {
     callback(err);
   });
 }
-
-function getStatusForID(id, callback) {
-  knex('statuses').where({stats: id}).then(function(results) {
-    callback(null, results);
-  }).catch(function(err) {
-    callback(err);
-  });
-};
 
 process.on('SIGINT', function() {
   console.log("\nGracefully shutting down from SIGINT (Ctrl+C)");
