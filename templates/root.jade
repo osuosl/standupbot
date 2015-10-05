@@ -1,5 +1,7 @@
 extends layout
 block content
+  if locals.message
+    .alert.alert-success #{message}
   form(name='standup', method='post', action='/irc').form-horizontal
     fieldset
       legend Your Information
