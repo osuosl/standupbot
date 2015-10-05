@@ -1,28 +1,42 @@
 [![Dependency Status](https://david-dm.org/osuosl/standupbot.svg)](https://david-dm.org/osuosl/standupbot)
 
-Run it via
-`$ npm start`
+# Installation
 
-
-# Installation Notes
-First install nodejs the normal way for your operating system.
-
-## OS X with Homebrew
+``standupbot`` uses nodejs, and all of its dependencies are handled through
+``npm``. To get it running, first install nodejs:
 
 ```
-$ brew install node
+    $ sudo apt-get install nodejs # ubuntu
+    $ brew install node # os x
 ```
 
-## Ubuntu Linux
+Then install all of its dependencies with ``npm``:
 
 ```
-$ sudo apt-get update
-$sudo apt-get install nodejs
+    $ npm install
 ```
 
-##Install the bot and dependencies
+To set up the SQLite database:
 
 ```
-$ cd path/to/standupbot
-$ npm install
+    $ npm run migrations
 ```
+
+# Usage
+
+Before using ``startupbot``, copy and modify its configuration:
+
+```
+    $ cp conf/custom-config.yaml.dist conf/custom-config.yaml
+    $ vi conf/custom-config.yaml
+```
+
+Be sure to set your IRC channel to the channel you want to operate in.
+
+To start the bot:
+
+```
+    $ npm start
+```
+
+You can then stop it by pressing Ctrl+C.
