@@ -60,7 +60,7 @@ app.get('/', function(req, res) {
       }
       render(locals);
     }).catch(function(err) {
-      // TODO handle this error
+      res.status(500).send("Database failure: " + err);
     });
   } else {
     render(locals);
@@ -87,10 +87,10 @@ app.get('/api/historical', function(req, res) {
       res.write(body);
       res.end();
     }).catch(function(err) {
-      res.send(JSON.stringify({error: 'Database connection failure'}));
+      res.send(JSON.stringify({error: 'Database error', contents: err}));
     });
   }).catch(function(err) {
-    res.send(JSON.stringify({error: 'Database connection failure'}));
+    res.send(JSON.stringify({error: 'Database error', contents: err}));
   });
 });
 
