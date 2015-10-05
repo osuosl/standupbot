@@ -1,0 +1,18 @@
+.input-xlarge, .completed {
+  width: 40%;
+  max-width: 500px;
+}
+
+fieldset {
+  margin-bottom: 30px;
+}
+
+@media (max-width: 530px) {
+  .pull-right {
+    float: none; !important
+  }
+
+  .input-xlarge, .completed {
+    width: 100%;
+  }
+}

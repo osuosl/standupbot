@@ -18,7 +18,7 @@ block content
       .control-group
         label.control-label(for='completed') What I Completed
         .controls
-          .well.pull-right.span5
+          .well.pull-right.span5.completed
             ul
               - for row in completed
                 li #{row}
@@ -26,7 +26,7 @@ block content
       .control-group
         label.control-label(for='inprogress') What I'm Working on Today
         .controls
-          .well.pull-right.span5
+          .well.pull-right.span5.completed
             ul
               - for row in inprogress
                 li #{row}
@@ -34,7 +34,7 @@ block content
       .control-group
         label.control-label(for='impediments') What Impediments I Have
         .controls
-          .well.pull-right.span5
+          .well.pull-right.span5.completed
             ul
               - for row in impediments
                 li #{row}
