@@ -138,9 +138,9 @@ app.post('/irc', function(req, res){
 
       saveStatsRow(req.body.irc_nick, finished, inProgress, impediments, function(err, lastID) {
         saveStatusRows(lastID, locals, function(err) {
-          var testLocals = {completed: [], inprogress: [], impediments: [], message: 'Successfully submitted!'}
+          locals.message = 'Successfully submitted!'
           res.cookie('lastID', lastID, { domain: config.domain });
-          render(req, res, testLocals);
+          render(req, res, locals);
         });
       });
     });
@@ -208,4 +208,4 @@ process.on('SIGINT', function() {
 
 // Start the server
 app.listen(config.web.port);
-console.log('Listening on port ' + config.web.port);
+console.log('Listening on http://localhost:' + config.web.port);
