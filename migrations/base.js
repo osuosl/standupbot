@@ -1,14 +1,14 @@
 exports.up = function(knex) {
   return knex.schema.createTable('stats', function(table) {
     table.increments('id').primary();
-    table.string('name').notNullable();
+    table.integer('user').references('id').inTable('users').notNullable();
     table.timestamp('time').notNullable();
     table.boolean('finished').notNullable();
     table.boolean('inprogress').notNullable();
     table.boolean('impediments').notNullable();
   }).createTable('statuses', function(table) {
     table.increments('id').primary();
-    table.string('name').notNullable();
+    table.integer('user').references('id').inTable('users').notNullable();
     table.timestamp('time').notNullable();
     table.integer('state').notNullable();
     table.string('status').notNullable();
@@ -19,7 +19,7 @@ exports.up = function(knex) {
     table.string('real_name').notNullable();
   }).createTable('areas', function(table) {
     table.increments('id').primary();
-    table.string('name').unique().notNullable();
+    table.integer('user').unique().references('id').inTable('users').notNullable();
   });
 };
 
