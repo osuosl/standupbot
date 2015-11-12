@@ -13,10 +13,18 @@ exports.up = function(knex) {
     table.integer('state').notNullable();
     table.string('status').notNullable();
     table.integer('stats').references('id').inTable('stats').notNullable();
+  }).createTable('users', function(table) {
+    table.increments('id').primary();
+    table.string('nick').unique().notNullable();
+    table.string('real_name').notNullable();
+  }).createTable('areas', function(table) {
+    table.increments('id').primary();
+    table.string('name').unique().notNullable();
   });
 };
 
 exports.down = function(knex) {
   knex.schema.dropTable('stats');
   knex.schema.dropTable('statuses');
+  knex.schema.dropTable('users');
 };

@@ -38,18 +38,18 @@ app.use(bodyParser.urlencoded({extended: false}));
 // Enable cookie parsing on requests
 app.use(cookieParser());
 
+var render = function(req, res, templateLocals) {
+  if (!templateLocals) {
+    templateLocals = {};
+  }
+  templateLocals.url = req.url;
+  templateLocals.cookies = req.cookies;
+  res.render('root.jade', templateLocals);
+}
+
 // Serve up the root which includes the form
 app.get('/', function(req, res) {
   var locals = {completed: [], inprogress: [], impediments: []}
-
-  function render(templateLocals) {
-    if (!templateLocals) {
-      templateLocals = {};
-    }
-    templateLocals.url = req.url;
-    templateLocals.cookies = req.cookies;
-    res.render('root.jade', templateLocals);
-  }
 
   if (req.cookies.lastID) {
     knex('statuses').where({stats: req.cookies.lastID}).then(function(result) {
@@ -58,12 +58,12 @@ app.get('/', function(req, res) {
             key = STATES[row.state];
         locals[key].push(row.status);
       }
-      render(locals);
+      render(req, res, locals);
     }).catch(function(err) {
       res.status(500).send("Database failure: " + err);
     });
   } else {
-    render(locals);
+    render(req, res, locals);
   }
 });
 
@@ -113,9 +113,7 @@ app.post('/irc', function(req, res){
   }
 
   if (!locals.irc_nick) {
-    res.status(400);
-    res.send('Error: IRC nick not provided.');
-    return;
+    return res.status(400).send('Error: IRC nick not provided.');
   }
 
   res.cookie('irc_nick', req.body.irc_nick, { domain: config.domain });
@@ -132,13 +130,14 @@ app.post('/irc', function(req, res){
         console.log("Logged " + req.body.irc_nick + "'s standup.");
       });
     });
-    saveStatsRow(req.body.irc_nick, finished, inProgress, impediments,
-           function(err, lastID) {
-             saveStatusRows(lastID, locals, function(err) {
-               res.cookie('lastID', lastID, { domain: config.domain });
-               res.send("<pre>\n" + result + "\n</pre>");
-             });
-           });
+
+    saveStatsRow(req.body.irc_nick, finished, inProgress, impediments, function(err, lastID) {
+      saveStatusRows(lastID, locals, function(err) {
+        var testLocals = {completed: [], inprogress: [], impediments: [], message: 'Successfully submitted!'}
+        res.cookie('lastID', lastID, { domain: config.domain });
+        render(req, res, testLocals);
+      });
+    });
   });
 });
 
