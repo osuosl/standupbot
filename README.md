@@ -16,12 +16,6 @@ Then install all of its dependencies with ``npm``:
     $ npm install
 ```
 
-To set up the SQLite database:
-
-```
-    $ npm run migrations
-```
-
 # Usage
 
 Before using ``startupbot``, copy and modify its configuration:
@@ -32,6 +26,12 @@ Before using ``startupbot``, copy and modify its configuration:
 ```
 
 Be sure to set your IRC channel to the channel you want to operate in.
+
+Then set up the SQLite database:
+
+```
+    $ npm run migrations
+```
 
 To start the bot:
 
