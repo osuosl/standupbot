@@ -26,7 +26,7 @@
   "scripts": {
     "start": "while(true) do node standupbot.js; sleep 5; done",
     "test": "mocha",
-    "migrations": "knex migrate:latest",
+    "migrations": "knex migrate:latest; knex seed:run",
     "lint": "eslint ."
   },
   "engine": "node >= 0.8.14"
