@@ -120,7 +120,7 @@ app.post('/irc', function(req, res){
     return res.status(400).send('Error: IRC nick not provided.');
   }
 
-  knex('users').select({nick: locals.irc_nick}).first().then(function(user) {
+  knex('users').select().where({nick: locals.irc_nick}).first().then(function(user) {
     if (!user) {
       return res.status(400).send('Error: Invalid nick.');
     }
