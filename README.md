@@ -24,7 +24,7 @@ To set up the SQLite database:
 
 # Usage
 
-Before using ``startupbot``, copy and modify its configuration:
+Before using ``standupbot``, copy and modify its configuration:
 
 ```
     $ cp conf/custom-config.yaml.dist conf/custom-config.yaml
