@@ -31,6 +31,7 @@ Then set up the SQLite database:
 
 ```
     $ npm run migrations
+    $ npm run seed
 ```
 
 To start the bot:
