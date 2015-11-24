@@ -153,6 +153,16 @@ app.post('/irc', function(req, res){
   });
 });
 
+// Serve error pages
+app.use(function(req, res) {
+  res.status(400);
+  res.render('404.jade', {title: '404: File Not Found'});
+});
+app.use(function(error, req, res, next) {
+  res.status(500);
+  res.render('500.jade', {title:'500: Internal Server Error', error: error});
+});
+
 // trim each line to 500 characters max
 function truncateResult(result) {
   var htmlLines = result.split('\n'),
