@@ -56,7 +56,11 @@ app.get('/', function(req, res) {
       for (var i=0; i<result.length; i++) {
         var row = result[i],
             key = STATES[row.state];
-        locals[key].push(row.status);
+        if (locals[key]) {
+          locals[key].push(row.status);
+        } else {
+          locals[key] = [row.status];
+        }
       }
       render(req, res, locals);
     }).catch(function(err) {
@@ -116,28 +120,36 @@ app.post('/irc', function(req, res){
     return res.status(400).send('Error: IRC nick not provided.');
   }
 
-  res.cookie('irc_nick', req.body.irc_nick, { domain: config.domain });
-  res.cookie('area', req.body.area, { domain: config.domain });
-
-  res.render('partials/ircOutput', locals, function(err, result) {
-    if (err) {
-      console.log('Error processing input! ' + err);
+  knex('users').select().where({nick: locals.irc_nick}).first().then(function(user) {
+    if (!user) {
+      return res.status(400).send('Error: Invalid nick.');
     }
-    result = truncateResult(result);
 
-    ircHandler.publishToChannels(result, function () {
-      fs.writeFile(config.members_dir + "/" + req.body.irc_nick, result, function(err) {
-        console.log("Logged " + req.body.irc_nick + "'s standup.");
+    res.cookie('irc_nick', req.body.irc_nick, { domain: config.domain, maxAge: 1000*60*60*24*7 });
+    res.cookie('area', req.body.area, { domain: config.domain, maxAge: 1000*60*60*24*7 });
+
+    res.render('partials/ircOutput', locals, function(err, result) {
+      if (err) {
+        console.log('Error processing input! ' + err);
+      }
+      result = truncateResult(result);
+
+      ircHandler.publishToChannels(result, function () {
+        fs.writeFile(config.members_dir + "/" + req.body.irc_nick, result, function(err) {
+          console.log("Logged " + req.body.irc_nick + "'s standup.");
+        });
+      });
+
+      saveStatsRow(req.body.irc_nick, finished, inProgress, impediments, function(err, lastID) {
+        saveStatusRows(lastID, locals, function(err) {
+          locals.message = 'Successfully submitted!'
+          res.cookie('lastID', lastID, { domain: config.domain, maxAge: 1000*60*60*24*7 });
+          render(req, res, locals);
+        });
       });
     });
-
-    saveStatsRow(req.body.irc_nick, finished, inProgress, impediments, function(err, lastID) {
-      saveStatusRows(lastID, locals, function(err) {
-        var testLocals = {completed: [], inprogress: [], impediments: [], message: 'Successfully submitted!'}
-        res.cookie('lastID', lastID, { domain: config.domain });
-        render(req, res, testLocals);
-      });
-    });
+  }).catch(function(err) {
+    res.status(500).send("Database failure: " + err);
   });
 });
 
@@ -162,9 +174,9 @@ function truncateResult(result) {
 function saveStatusRows(lastID, locals, callback) {
   var now = new Date().getTime();
   statuses = [];
-  for (var state of STATES) {
+  for (var state in STATES) {
     // for every state, a user can submit multiple tasks with linebreaks
-    for (var task of locals[state]) {
+    for (var task of locals[STATES[state]]) {
       statuses.push({name: locals.irc_nick, time: now, state: state, status: task, stats: lastID});
     }
   }
@@ -200,4 +212,4 @@ process.on('SIGINT', function() {
 
 // Start the server
 app.listen(config.web.port);
-console.log('Listening on port ' + config.web.port);
+console.log('Listening on http://localhost:' + config.web.port);
