@@ -125,6 +125,10 @@ app.post('/irc', function(req, res){
       return res.status(400).send('Error: Invalid nick.');
     }
 
+    if (user.disabled) {
+      return res.status(400).send('Error: Nick disabled.');
+    }
+
     res.cookie('irc_nick', req.body.irc_nick, { domain: config.domain, maxAge: 1000*60*60*24*7 });
     res.cookie('area', req.body.area, { domain: config.domain, maxAge: 1000*60*60*24*7 });
 
