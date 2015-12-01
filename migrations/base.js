@@ -17,6 +17,7 @@ exports.up = function(knex) {
     table.increments('id').primary();
     table.string('nick').unique().notNullable();
     table.string('real_name').notNullable();
+    table.boolean('disabled').defaultTo(0).notNullable();
   }).createTable('areas', function(table) {
     table.increments('id').primary();
     table.integer('user').unique().references('id').inTable('users').notNullable();
