@@ -45,9 +45,9 @@ function makeIrcClient(config) {
 
   // Connect IRC client and initize timers
   client.connect(function() {
-    new cron(timers.earlyReminder, announceEarlyReminder.bind(null, config), null, true);
-    new cron(timers.dueReminder, announceDueReminder.bind(null, config), null, true);
-    new cron(timers.lateReminder, announceLateReminder.bind(null, config), null, true);
+    new cron(timers.earlyReminder, announceReminder.bind(null, 'Standups are due soon.', config), null, true);
+    new cron(timers.dueReminder, announceReminder.bind(null, 'Standups are due!', config), null, true);
+    new cron(timers.lateReminder, announceReminder.bind(null, 'Standups are late!', config), null, true);
     new cron(timers.deadlineReminder, announceDeadlineReminder.bind(null, config), null, true);
   });
 
@@ -128,30 +128,19 @@ function checkForMissingStandups(config, callback) {
 
 exports.checkForMissingStandups = checkForMissingStandups;
 
+function remindMembers(message, missing, callback) {
+  var remind = function(member, callback) {
+    client.say(member, message);
+    callback();
+  };
 
-function announceEarlyReminder(config) {
-  checkForMissingStandups(config, function(err, missing) {
-    var msg = 'Standups are due soon. (' + missing.join(', ') + ')';
-    remindChannels(msg, function() {
-      console.log('Reminded channel that standups are due soon.');
-    });
-  });
+  async.forEach(missing, remind, callback);
 }
 
-function announceDueReminder(config) {
+function announceReminder(msg, config) {
   checkForMissingStandups(config, function(err, missing) {
-    var msg = 'Standups are due! (' + missing.join(', ') + ')';
-    remindChannels(msg, function() {
-      console.log('Reminded channel that standups are due now.');
-    });
-  });
-}
-
-function announceLateReminder(config) {
-  checkForMissingStandups(config, function(err, missing) {
-    var msg = 'Standups are late! (' + missing.join(', ') + ')';
-    remindChannels(msg, function() {
-      console.log('Reminded channels that standups are late.');
+    remindMembers('Standups are ' + msg, missing, function() {
+      console.log('Reminded members that stand ups are ' + msg);
     });
   });
 }
