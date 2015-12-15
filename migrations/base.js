@@ -21,6 +21,14 @@ exports.up = function(knex) {
   }).createTable('areas', function(table) {
     table.increments('id').primary();
     table.integer('user').unique().references('id').inTable('users').notNullable();
+  }).createTable('mod_queue', function(table) {
+    table.increments('id').primary();
+    table.integer('user').references('id').inTable('users').notNullable();
+    table.date('day').notNullable();
+    table.time('in_time');
+    table.time('out_time');
+    table.boolean('absent');
+    table.string('reason');
   });
 };
 
