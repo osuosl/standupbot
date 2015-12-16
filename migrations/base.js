@@ -18,6 +18,13 @@ exports.up = function(knex) {
     table.string('nick').unique().notNullable();
     table.string('real_name').notNullable();
     table.boolean('disabled').defaultTo(0).notNullable();
+  }).createTable('teams', function(table) {
+    table.increments('id').primary();
+    table.string('name').unique().notNullable();
+  }).createTable('user_teams', function(table) {
+    table.integer('user').references('id').inTable('users').notNullable();
+    table.integer('team').references('id').inTable('teams').notNullable();
+    table.primary(['user', 'team']);
   }).createTable('areas', function(table) {
     table.increments('id').primary();
     table.integer('user').unique().references('id').inTable('users').notNullable();
