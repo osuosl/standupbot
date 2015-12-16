@@ -19,7 +19,8 @@
     "js-yaml": "3.4.2",
     "knex": "^0.8.6",
     "sqlite3": "3.1.0",
-    "caldav": "0.0.1"
+    "caldav": "0.0.1",
+    "oauth": "0.9.14"
   },
   "devDependencies": {
     "mocha": "2.3.2"
