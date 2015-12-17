@@ -3,3 +3,4 @@ node_modules/
 stats.db
 dev.sqlite3
 members/
+client_secret.json
